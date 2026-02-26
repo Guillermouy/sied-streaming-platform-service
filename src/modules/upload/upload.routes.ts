@@ -2,9 +2,10 @@ import { Router } from 'express';
 import multer from 'multer';
 import path from 'path';
 import crypto from 'crypto';
+import { UPLOADS_DIR } from '../../lib/uploads';
 
 const storage = multer.diskStorage({
-  destination: path.join(__dirname, '../../../uploads'),
+  destination: UPLOADS_DIR,
   filename: (_req, file, cb) => {
     const ext = path.extname(file.originalname);
     const name = crypto.randomUUID();
