@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { ZodError } from 'zod';
+import multer from 'multer';
 
 export class AppError extends Error {
   constructor(
@@ -17,6 +18,15 @@ export function errorHandler(
   res: Response,
   _next: NextFunction,
 ) {
+  if (err instanceof multer.MulterError) {
+    const messages: Record<string, string> = {
+      LIMIT_FILE_SIZE: 'El archivo supera el tamaño máximo permitido (10 MB)',
+      LIMIT_UNEXPECTED_FILE: 'Campo de archivo inesperado',
+    };
+    res.status(400).json({ error: messages[err.code] || err.message });
+    return;
+  }
+
   if (err instanceof ZodError) {
     res.status(400).json({
       error: 'Validation error',
