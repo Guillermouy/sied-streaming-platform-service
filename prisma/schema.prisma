@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum EventStatus {
+  DRAFT
+  PUBLISHED
+  LIVE
+  FINISHED
+}
+
+model Event {
+  id                  String      @id @default(cuid())
+  title               String
+  shortDescription    String
+  longDescription     String?
+  speakers            String
+  date                DateTime
+  startTime           String
+  endTime             String
+  timezone            String      @default("America/Argentina/Buenos_Aires")
+  youtubeUrl          String?
+  status              EventStatus @default(DRAFT)
+  coverImage          String?
+  accessText          String?     @default("Acceder al evento")
+  registrationEnabled Boolean     @default(true)
+  liveEnabled         Boolean     @default(false)
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+
+  registrations EventRegistration[]
+
+  @@map("events")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  firstName String
+  lastName  String
+  email     String   @unique
+  country   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  registrations EventRegistration[]
+
+  @@map("users")
+}
+
+model EventRegistration {
+  id              String   @id @default(cuid())
+  userId          String
+  eventId         String
+  privacyAccepted Boolean
+  createdAt       DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, eventId])
+  @@map("event_registrations")
+}
