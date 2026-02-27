@@ -1,7 +1,7 @@
 import { prisma } from '../../lib/prisma';
 import { CreateRegistrationInput } from './registrations.schema';
 import { AppError } from '../../middleware/error-handler';
-import { sendRegistrationEmail } from '../../lib/mail';
+import { sendRegistrationEmail, sendAccessEmail } from '../../lib/mail';
 
 const APP_URL = process.env.APP_URL || 'http://localhost:5173';
 
@@ -69,6 +69,39 @@ export async function registerToEvent(
   });
 
   return registration;
+}
+
+export async function resendAccessLink(eventId: string, email: string) {
+  const event = await prisma.event.findUnique({ where: { id: eventId } });
+  if (!event) throw new AppError(404, 'Evento no encontrado');
+
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user) {
+    throw new AppError(404, 'No encontramos un registro con ese email');
+  }
+
+  const registration = await prisma.eventRegistration.findUnique({
+    where: { userId_eventId: { userId: user.id, eventId } },
+  });
+
+  if (!registration) {
+    throw new AppError(404, 'No encontramos un registro con ese email para este evento');
+  }
+
+  await sendAccessEmail({
+    to: email,
+    firstName: user.firstName,
+    eventTitle: event.title,
+    eventDate: event.date.toISOString(),
+    eventStartTime: event.startTime,
+    eventEndTime: event.endTime,
+    eventTimezone: event.timezone,
+    eventSpeakers: event.speakers,
+    liveUrl: `${APP_URL}/events/${event.id}/live`,
+    eventUrl: `${APP_URL}/events/${event.id}`,
+  });
+
+  return { success: true };
 }
 
 export async function getEventRegistrations(eventId: string) {

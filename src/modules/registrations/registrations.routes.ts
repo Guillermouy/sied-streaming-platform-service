@@ -8,6 +8,11 @@ registrationsRouter.post(
   registrationsController.register,
 );
 
+registrationsRouter.post(
+  '/:eventId/resend-access',
+  registrationsController.resendAccess,
+);
+
 registrationsRouter.get(
   '/:eventId/registrations',
   registrationsController.listRegistrations,

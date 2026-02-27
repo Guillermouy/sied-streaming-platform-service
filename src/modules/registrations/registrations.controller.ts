@@ -15,6 +15,22 @@ export async function register(req: Request, res: Response, next: NextFunction) 
   }
 }
 
+export async function resendAccess(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { email } = req.body;
+    if (!email || typeof email !== 'string') {
+      return res.status(400).json({ error: 'El email es obligatorio' });
+    }
+    const result = await registrationsService.resendAccessLink(
+      req.params.eventId,
+      email,
+    );
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+}
+
 export async function listRegistrations(
   req: Request,
   res: Response,
