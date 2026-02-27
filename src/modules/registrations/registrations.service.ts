@@ -21,12 +21,20 @@ export async function registerToEvent(
       firstName: data.firstName,
       lastName: data.lastName,
       country: data.country,
+      profile: data.profile,
+      specialty: data.specialty ?? null,
+      phoneCode: data.phoneCode,
+      phoneNumber: data.phoneNumber,
     },
     create: {
       firstName: data.firstName,
       lastName: data.lastName,
       email: data.email,
       country: data.country,
+      profile: data.profile,
+      specialty: data.specialty ?? null,
+      phoneCode: data.phoneCode,
+      phoneNumber: data.phoneNumber,
     },
   });
 
