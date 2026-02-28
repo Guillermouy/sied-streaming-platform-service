@@ -7,6 +7,7 @@ const PROFILES = [
   'Profesional otra área de la salud',
   'Estudiante de medicina',
   'Enfermera(o)',
+  'Otro',
 ] as const;
 
 export const createRegistrationSchema = z
