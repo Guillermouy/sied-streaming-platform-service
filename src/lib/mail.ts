@@ -124,15 +124,22 @@ function buildHtml(data: RegistrationEmailData): string {
               </table>
               <table cellpadding="0" cellspacing="0" width="100%">
                 <tr>
+                  <td align="center" style="padding-bottom:10px;">
+                    <a href="${data.eventUrl}/live" style="${emailStyles.primaryButton}">
+                      Acceder a la transmisi&oacute;n en vivo
+                    </a>
+                  </td>
+                </tr>
+                <tr>
                   <td align="center">
-                    <a href="${data.eventUrl}" style="${emailStyles.primaryButton}">
-                      Ver evento
+                    <a href="${data.eventUrl}" style="${emailStyles.secondaryButton}">
+                      Ver detalles del evento
                     </a>
                   </td>
                 </tr>
               </table>
               <p style="margin:22px 0 0;color:#95a4c8;font-size:13px;line-height:1.65;text-align:center;">
-                El dia del evento, ingresa con el boton para acceder a la transmision en vivo.
+                El d&iacute;a del evento, ingres&aacute; al bot&oacute;n principal para ver la transmisi&oacute;n en vivo.
               </p>
             </td>
           </tr>
@@ -161,9 +168,10 @@ Fecha: ${formatDate(data.eventDate)}
 Horario: ${data.eventStartTime} – ${data.eventEndTime} (${data.eventTimezone})
 Expositores: ${data.eventSpeakers}
 
-Accedé al evento: ${data.eventUrl}
+Acceder a la transmisión en vivo: ${data.eventUrl}/live
+Ver detalles del evento: ${data.eventUrl}
 
-El día del evento, ingresá al link para acceder a la transmisión en vivo.
+El día del evento, ingresá al primer enlace para ver la transmisión en vivo.
 
 SIED — Sociedad Interamericana de Endoscopía Digestiva`;
 }
