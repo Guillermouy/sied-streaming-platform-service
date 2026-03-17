@@ -21,6 +21,7 @@ interface RegistrationEmailData {
   eventTimezone: string;
   eventSpeakers: string;
   eventUrl: string;
+  liveUrl: string;
 }
 
 function formatDate(dateStr: string): string {
@@ -125,7 +126,7 @@ function buildHtml(data: RegistrationEmailData): string {
               <table cellpadding="0" cellspacing="0" width="100%">
                 <tr>
                   <td align="center" style="padding-bottom:10px;">
-                    <a href="${data.eventUrl}/live" style="${emailStyles.primaryButton}">
+                    <a href="${data.liveUrl}" style="${emailStyles.primaryButton}">
                       Acceder a la transmisi&oacute;n en vivo
                     </a>
                   </td>
@@ -168,7 +169,7 @@ Fecha: ${formatDate(data.eventDate)}
 Horario: ${data.eventStartTime} – ${data.eventEndTime} (${data.eventTimezone})
 Expositores: ${data.eventSpeakers}
 
-Acceder a la transmisión en vivo: ${data.eventUrl}/live
+Acceder a la transmisión en vivo: ${data.liveUrl}
 Ver detalles del evento: ${data.eventUrl}
 
 El día del evento, ingresá al primer enlace para ver la transmisión en vivo.

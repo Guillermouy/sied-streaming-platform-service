@@ -66,6 +66,7 @@ export async function registerToEvent(
     eventTimezone: event.timezone,
     eventSpeakers: event.speakers,
     eventUrl: `${APP_URL}/events/${event.id}`,
+    liveUrl: `${APP_URL}/events/${event.id}/live/user/${user.id}`,
   });
 
   return registration;
@@ -97,7 +98,7 @@ export async function resendAccessLink(eventId: string, email: string) {
     eventEndTime: event.endTime,
     eventTimezone: event.timezone,
     eventSpeakers: event.speakers,
-    liveUrl: `${APP_URL}/events/${event.id}/live`,
+    liveUrl: `${APP_URL}/events/${event.id}/live/user/${user.id}`,
     eventUrl: `${APP_URL}/events/${event.id}`,
   });
 
