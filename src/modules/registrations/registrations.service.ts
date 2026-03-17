@@ -105,6 +105,45 @@ export async function resendAccessLink(eventId: string, email: string) {
   return { success: true };
 }
 
+export async function sendAccessToAllRegistrants(eventId: string) {
+  const event = await prisma.event.findUnique({ where: { id: eventId } });
+  if (!event) throw new AppError(404, 'Evento no encontrado');
+
+  const registrations = await prisma.eventRegistration.findMany({
+    where: { eventId },
+    include: { user: true },
+  });
+
+  if (registrations.length === 0) {
+    throw new AppError(400, 'No hay inscriptos para este evento');
+  }
+
+  let sent = 0;
+  let failed = 0;
+
+  for (const reg of registrations) {
+    try {
+      await sendAccessEmail({
+        to: reg.user.email,
+        firstName: reg.user.firstName,
+        eventTitle: event.title,
+        eventDate: event.date.toISOString(),
+        eventStartTime: event.startTime,
+        eventEndTime: event.endTime,
+        eventTimezone: event.timezone,
+        eventSpeakers: event.speakers,
+        liveUrl: `${APP_URL}/events/${event.id}/live/user/${reg.user.id}`,
+        eventUrl: `${APP_URL}/events/${event.id}`,
+      });
+      sent++;
+    } catch {
+      failed++;
+    }
+  }
+
+  return { total: registrations.length, sent, failed };
+}
+
 export async function getEventRegistrations(eventId: string) {
   const event = await prisma.event.findUnique({ where: { id: eventId } });
   if (!event) throw new AppError(404, 'Evento no encontrado');

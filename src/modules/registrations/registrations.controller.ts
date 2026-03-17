@@ -31,6 +31,17 @@ export async function resendAccess(req: Request, res: Response, next: NextFuncti
   }
 }
 
+export async function sendAccessToAll(req: Request, res: Response, next: NextFunction) {
+  try {
+    const result = await registrationsService.sendAccessToAllRegistrants(
+      req.params.eventId,
+    );
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+}
+
 export async function listRegistrations(
   req: Request,
   res: Response,

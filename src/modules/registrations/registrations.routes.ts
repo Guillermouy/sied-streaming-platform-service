@@ -13,6 +13,11 @@ registrationsRouter.post(
   registrationsController.resendAccess,
 );
 
+registrationsRouter.post(
+  '/:eventId/send-access-all',
+  registrationsController.sendAccessToAll,
+);
+
 registrationsRouter.get(
   '/:eventId/registrations',
   registrationsController.listRegistrations,
