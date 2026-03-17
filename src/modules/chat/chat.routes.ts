@@ -21,6 +21,15 @@ chatRouter.get('/:eventId/viewers/count', async (req, res, next) => {
   }
 });
 
+chatRouter.get('/:eventId/viewers', async (req, res, next) => {
+  try {
+    const viewers = await chatService.listViewers(req.params.eventId);
+    res.json(viewers);
+  } catch (err) {
+    next(err);
+  }
+});
+
 chatRouter.get('/:eventId/viewer-user/:userId', async (req, res, next) => {
   try {
     const user = await chatService.getUserById(req.params.userId);

@@ -13,14 +13,14 @@ export async function createEvent(data: CreateEventInput) {
 export async function listEvents() {
   return prisma.event.findMany({
     orderBy: { date: 'desc' },
-    include: { _count: { select: { registrations: true } } },
+    include: { _count: { select: { registrations: true, viewerLogs: true } } },
   });
 }
 
 export async function getEventById(id: string) {
   return prisma.event.findUnique({
     where: { id },
-    include: { _count: { select: { registrations: true } } },
+    include: { _count: { select: { registrations: true, viewerLogs: true } } },
   });
 }
 
