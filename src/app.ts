@@ -4,6 +4,7 @@ import { healthRouter } from './modules/health/health.routes';
 import { eventsRouter } from './modules/events/events.routes';
 import { registrationsRouter } from './modules/registrations/registrations.routes';
 import { uploadRouter } from './modules/upload/upload.routes';
+import { chatRouter } from './modules/chat/chat.routes';
 import { errorHandler } from './middleware/error-handler';
 import { UPLOADS_DIR } from './lib/uploads';
 
@@ -18,5 +19,6 @@ app.use('/api', healthRouter);
 app.use('/api/upload', uploadRouter);
 app.use('/api/events', eventsRouter);
 app.use('/api/events', registrationsRouter);
+app.use('/api/events', chatRouter);
 
 app.use(errorHandler);

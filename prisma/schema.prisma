@@ -33,7 +33,9 @@ model Event {
   createdAt           DateTime    @default(now())
   updatedAt           DateTime    @updatedAt
 
-  registrations EventRegistration[]
+  registrations  EventRegistration[]
+  chatMessages   ChatMessage[]
+  viewerLogs     LiveViewerLog[]
 
   @@map("events")
 }
@@ -52,6 +54,7 @@ model User {
   updatedAt   DateTime @updatedAt
 
   registrations EventRegistration[]
+  chatMessages  ChatMessage[]
 
   @@map("users")
 }
@@ -68,4 +71,32 @@ model EventRegistration {
 
   @@unique([userId, eventId])
   @@map("event_registrations")
+}
+
+model ChatMessage {
+  id          String   @id @default(cuid())
+  eventId     String
+  userId      String?
+  senderName  String
+  content     String
+  createdAt   DateTime @default(now())
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([eventId, createdAt])
+  @@map("chat_messages")
+}
+
+model LiveViewerLog {
+  id         String   @id @default(cuid())
+  eventId    String
+  userId     String?
+  sessionId  String
+  joinedAt   DateTime @default(now())
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId])
+  @@map("live_viewer_logs")
 }
