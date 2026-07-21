@@ -6,6 +6,7 @@ export async function createEvent(data: CreateEventInput) {
     data: {
       ...data,
       date: new Date(data.date),
+      endDate: data.endDate ? new Date(data.endDate) : null,
     },
   });
 }
@@ -28,6 +29,9 @@ export async function updateEvent(id: string, data: UpdateEventInput) {
   const updateData: Record<string, unknown> = { ...data };
   if (data.date) {
     updateData.date = new Date(data.date);
+  }
+  if ('endDate' in data) {
+    updateData.endDate = data.endDate ? new Date(data.endDate) : null;
   }
 
   return prisma.event.update({

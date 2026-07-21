@@ -21,6 +21,7 @@ model Event {
   longDescription     String?
   speakers            String
   date                DateTime
+  endDate             DateTime?
   startTime           String
   endTime             String
   timezone            String      @default("America/Argentina/Buenos_Aires")

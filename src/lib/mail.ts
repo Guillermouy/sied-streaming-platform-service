@@ -16,6 +16,7 @@ interface RegistrationEmailData {
   lastName: string;
   eventTitle: string;
   eventDate: string;
+  eventEndDate?: string | null;
   eventStartTime: string;
   eventEndTime: string;
   eventTimezone: string;
@@ -31,6 +32,15 @@ function formatDate(dateStr: string): string {
     month: 'long',
     day: 'numeric',
   });
+}
+
+// Muestra el rango de fechas si el evento dura más de un día.
+function formatDateRange(dateStr: string, endDateStr?: string | null): string {
+  const start = formatDate(dateStr);
+  if (!endDateStr || endDateStr.slice(0, 10) === dateStr.slice(0, 10)) {
+    return start;
+  }
+  return `${start} al ${formatDate(endDateStr)}`;
 }
 
 const emailStyles = {
@@ -66,6 +76,7 @@ const emailStyles = {
 
 function buildEventDetailsRows(data: {
   eventDate: string;
+  eventEndDate?: string | null;
   eventStartTime: string;
   eventEndTime: string;
   eventTimezone: string;
@@ -74,7 +85,7 @@ function buildEventDetailsRows(data: {
   return `
     <tr>
       <td style="${emailStyles.label}">Fecha</td>
-      <td style="${emailStyles.value}">${formatDate(data.eventDate)}</td>
+      <td style="${emailStyles.value}">${formatDateRange(data.eventDate, data.eventEndDate)}</td>
     </tr>
     <tr>
       <td style="${emailStyles.label}">Horario</td>
@@ -165,7 +176,7 @@ function buildText(data: RegistrationEmailData): string {
 Hola ${data.firstName}, te confirmamos que tu registro al siguiente evento fue exitoso.
 
 ${data.eventTitle}
-Fecha: ${formatDate(data.eventDate)}
+Fecha: ${formatDateRange(data.eventDate, data.eventEndDate)}
 Horario: ${data.eventStartTime} – ${data.eventEndTime} (${data.eventTimezone})
 Expositores: ${data.eventSpeakers}
 
@@ -182,6 +193,7 @@ interface AccessEmailData {
   firstName: string;
   eventTitle: string;
   eventDate: string;
+  eventEndDate?: string | null;
   eventStartTime: string;
   eventEndTime: string;
   eventTimezone: string;
@@ -268,7 +280,7 @@ function buildAccessText(data: AccessEmailData): string {
 Hola ${data.firstName}, aquí tenés el enlace para acceder a la transmisión en vivo del evento.
 
 ${data.eventTitle}
-Fecha: ${formatDate(data.eventDate)}
+Fecha: ${formatDateRange(data.eventDate, data.eventEndDate)}
 Horario: ${data.eventStartTime} – ${data.eventEndTime} (${data.eventTimezone})
 Expositores: ${data.eventSpeakers}
 
@@ -300,6 +312,135 @@ export async function sendAccessEmail(data: AccessEmailData): Promise<void> {
     console.log(`[mail] Access email sent to ${data.to}`);
   } catch (err) {
     console.error('[mail] Failed to send access email:', err);
+  }
+}
+
+interface CourseAvailableEmailData {
+  to: string;
+  firstName: string;
+  eventTitle: string;
+  courseUrl: string;
+}
+
+function buildCourseAvailableHtml(data: CourseAvailableEmailData): string {
+  return `
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark only">
+  <meta name="supported-color-schemes" content="dark only">
+  <style>
+    :root { color-scheme: dark only; supported-color-schemes: dark only; }
+    body, table, td, p, h1, h2, h3, span, a { -webkit-text-size-adjust:100%; }
+    u + .body .force-light { color:#f2f6ff !important; }
+    [data-ogsc] .force-light { color:#f2f6ff !important; }
+    [data-ogsc] .force-muted { color:#c1cae0 !important; }
+    [data-ogsc] .force-dim { color:#95a4c8 !important; }
+    @media (prefers-color-scheme: dark) {
+      .force-light { color:#f2f6ff !important; }
+      .force-muted { color:#c1cae0 !important; }
+      .force-dim { color:#95a4c8 !important; }
+      .card-solid { background-color:#1a2548 !important; background-image:none !important; }
+    }
+  </style>
+</head>
+<body class="body" style="${emailStyles.body}">
+  <table width="100%" cellpadding="0" cellspacing="0" style="${emailStyles.outer}">
+    <tr>
+      <td align="center">
+        <table width="620" cellpadding="0" cellspacing="0" style="${emailStyles.container}">
+          <tr>
+            <td style="${emailStyles.header}">
+              <span style="${emailStyles.headerBadge}">Curso SIED</span>
+              <h1 class="force-light" style="margin:14px 0 0;color:#f2f6ff;font-size:22px;line-height:1.25;font-weight:700;letter-spacing:.01em;">
+                Curso de J&oacute;venes Endoscopistas
+              </h1>
+              <p class="force-muted" style="margin:6px 0 0;color:#c1cae0;font-size:13px;line-height:1.5;">
+                Las clases de hoy quedaron publicadas
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="${emailStyles.content}">
+              <h2 class="force-light" style="${emailStyles.h2}">Las clases de hoy quedaron publicadas</h2>
+              <p class="force-muted" style="${emailStyles.paragraph}">
+                Hola <strong class="force-light" style="color:#f2f6ff;">${data.firstName}</strong>, te informamos que las clases de hoy del curso al que te registraste ya quedaron publicadas en nuestra plataforma de cursos.
+              </p>
+              <table width="100%" cellpadding="0" cellspacing="0" class="card-solid" style="margin:0 0 22px;background-color:#1a2548;border:1px solid #2c3a6b;border-radius:14px;">
+                <tr>
+                  <td style="${emailStyles.cardInner}">
+                    <h3 class="force-light" style="margin:0 0 10px;color:#f2f6ff;font-size:18px;line-height:1.35;font-weight:700;">${data.eventTitle}</h3>
+                    <p class="force-muted" style="margin:0;color:#c1cae0;font-size:14px;line-height:1.6;">
+                      Ingresa a la plataforma de cursos de SIED para acceder a todo el contenido cuando quieras.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+              <table cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                  <td align="center" style="padding-bottom:10px;">
+                    <a href="${data.courseUrl}" style="${emailStyles.primaryButton}">
+                      Acceder al curso
+                    </a>
+                  </td>
+                </tr>
+              </table>
+              <p class="force-dim" style="margin:22px 0 0;color:#95a4c8;font-size:13px;line-height:1.65;text-align:center;">
+                Si tenes alguna consulta, no dudes en escribirnos. Te deseamos un excelente aprendizaje.
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="${emailStyles.footer}">
+              <p class="force-dim" style="margin:0;color:#95a4c8;">
+                &copy; ${new Date().getFullYear()} SIED - Sociedad Interamericana de Endoscopia Digestiva
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+}
+
+function buildCourseAvailableText(data: CourseAvailableEmailData): string {
+  return `Las clases de hoy quedaron publicadas
+
+Hola ${data.firstName}, te informamos que las clases de hoy del curso al que te registraste ya quedaron publicadas en nuestra plataforma de cursos.
+
+${data.eventTitle}
+
+Acceder al curso: ${data.courseUrl}
+
+Si tenés alguna consulta, no dudes en escribirnos. Te deseamos un excelente aprendizaje.
+
+SIED — Sociedad Interamericana de Endoscopía Digestiva`;
+}
+
+export async function sendCourseAvailableEmail(data: CourseAvailableEmailData): Promise<void> {
+  const client = getClient();
+  const fromEmail = process.env.RESEND_FROM_EMAIL || 'no-reply@siedonline.org';
+
+  if (!client) {
+    console.warn('[mail] RESEND_API_KEY not set, skipping email');
+    return;
+  }
+
+  try {
+    await client.emails.send({
+      from: `SIED <${fromEmail}>`,
+      to: data.to,
+      subject: `Curso de Jóvenes Endoscopistas: las clases de hoy quedaron publicadas`,
+      text: buildCourseAvailableText(data),
+      html: buildCourseAvailableHtml(data),
+    });
+    console.log(`[mail] Course-available email sent to ${data.to}`);
+  } catch (err) {
+    console.error('[mail] Failed to send course-available email:', err);
   }
 }
 
