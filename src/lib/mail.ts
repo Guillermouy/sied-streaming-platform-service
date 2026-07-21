@@ -40,7 +40,7 @@ function formatDateRange(dateStr: string, endDateStr?: string | null): string {
   if (!endDateStr || endDateStr.slice(0, 10) === dateStr.slice(0, 10)) {
     return start;
   }
-  return `${start} al ${formatDate(endDateStr)}`;
+  return `${start} y ${formatDate(endDateStr)}`;
 }
 
 const emailStyles = {
