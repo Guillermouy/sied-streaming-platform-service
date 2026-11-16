@@ -3,6 +3,7 @@ import multer from 'multer';
 import path from 'path';
 import crypto from 'crypto';
 import { UPLOADS_DIR } from '../../lib/uploads';
+import { requireAdmin } from '../../lib/auth';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 
@@ -32,6 +33,7 @@ export const uploadRouter = Router();
 
 uploadRouter.post(
   '/',
+  requireAdmin,
   (req: Request, res: Response, next: NextFunction) => {
     upload.single('file')(req, res, (err) => {
       if (err) return next(err);

@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { chatService } from './chat.service';
+import { requireAdmin } from '../../lib/auth';
 
 export const chatRouter = Router();
 
@@ -21,7 +22,7 @@ chatRouter.get('/:eventId/viewers/count', async (req, res, next) => {
   }
 });
 
-chatRouter.get('/:eventId/viewers', async (req, res, next) => {
+chatRouter.get('/:eventId/viewers', requireAdmin, async (req, res, next) => {
   try {
     const viewers = await chatService.listViewers(req.params.eventId);
     res.json(viewers);

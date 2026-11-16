@@ -94,7 +94,7 @@ export const chatService = {
         id: true,
         firstName: true,
         lastName: true,
-        email: true,
+        // Sin email: este endpoint es público y los userId viajan en los mensajes del chat.
       },
     });
   },

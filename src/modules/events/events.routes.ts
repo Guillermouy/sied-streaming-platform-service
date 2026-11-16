@@ -1,10 +1,11 @@
 import { Router } from 'express';
+import { requireAdmin } from '../../lib/auth';
 import * as eventsController from './events.controller';
 
 export const eventsRouter = Router();
 
-eventsRouter.post('/', eventsController.create);
-eventsRouter.get('/', eventsController.list);
+eventsRouter.post('/', requireAdmin, eventsController.create);
+eventsRouter.get('/', requireAdmin, eventsController.list);
 eventsRouter.get('/:id', eventsController.getById);
-eventsRouter.patch('/:id', eventsController.update);
-eventsRouter.delete('/:id', eventsController.remove);
+eventsRouter.patch('/:id', requireAdmin, eventsController.update);
+eventsRouter.delete('/:id', requireAdmin, eventsController.remove);
