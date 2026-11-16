@@ -26,6 +26,7 @@ model Event {
   endTime             String
   timezone            String      @default("America/Argentina/Buenos_Aires")
   youtubeUrl          String?
+  youtubeUrlEn        String?
   status              EventStatus @default(DRAFT)
   coverImage          String?
   accessText          String?     @default("Acceder al evento")

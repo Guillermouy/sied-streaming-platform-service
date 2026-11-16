@@ -17,6 +17,14 @@ const eventFields = z.object({
     .refine((val) => !val || isValidYouTubeUrl(val), {
       message: 'URL de YouTube inválida',
     }),
+  // Stream opcional en inglés (eventos bilingües). Vacío = solo español.
+  youtubeUrlEn: z
+    .string()
+    .optional()
+    .nullable()
+    .refine((val) => !val || isValidYouTubeUrl(val), {
+      message: 'URL de YouTube (inglés) inválida',
+    }),
   status: z.enum(['DRAFT', 'PUBLISHED', 'LIVE', 'FINISHED']).optional(),
   coverImage: z.string().optional(),
   accessText: z.string().optional(),
