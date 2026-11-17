@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
-    "start": "node dist/index.js",
+    "start": "prisma migrate deploy && node dist/index.js",
     "db:migrate": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
     "db:generate": "prisma generate",
@@ -17,6 +17,7 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "multer": "^2.0.2",
+    "prisma": "^6.4.1",
     "resend": "^6.9.2",
     "socket.io": "^4.8.3",
     "zod": "^3.24.2"
@@ -26,7 +27,6 @@
     "@types/express": "^4.17.25",
     "@types/multer": "^2.0.0",
     "@types/node": "^22.13.5",
-    "prisma": "^6.4.1",
     "tsx": "^4.19.3",
     "typescript": "^5.7.3"
   }
