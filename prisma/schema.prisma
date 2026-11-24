@@ -31,6 +31,8 @@ model Event {
   modality            EventModality @default(ONLINE)
   venueName           String?
   venueAddress        String?
+  // Tope de inscriptos presenciales (null = sin límite).
+  inPersonCapacity    Int?
   status              EventStatus   @default(DRAFT)
   coverImage          String?
   accessText          String?       @default("Acceder al evento")

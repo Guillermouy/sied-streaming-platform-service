@@ -29,6 +29,14 @@ const eventFields = z.object({
   modality: z.enum(['ONLINE', 'PRESENCIAL', 'HIBRIDO']).optional(),
   venueName: z.string().max(200).optional().nullable(),
   venueAddress: z.string().max(300).optional().nullable(),
+  // Tope opcional de inscriptos presenciales (null = sin límite).
+  inPersonCapacity: z
+    .number({ invalid_type_error: 'El cupo debe ser un número' })
+    .int('El cupo debe ser un número entero')
+    .min(1, 'El cupo debe ser al menos 1')
+    .max(100000)
+    .optional()
+    .nullable(),
   status: z.enum(['DRAFT', 'PUBLISHED', 'LIVE', 'FINISHED']).optional(),
   coverImage: z.string().optional(),
   accessText: z.string().optional(),

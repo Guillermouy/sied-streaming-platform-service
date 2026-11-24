@@ -58,6 +58,36 @@ function publicRegistration(reg: EventRegistration) {
   };
 }
 
+const FULL_MESSAGE =
+  'El cupo presencial de este evento está completo.';
+
+/**
+ * Ejecuta `fn` (que da de alta una inscripción presencial) solo si hay cupo.
+ * Bloquea la fila del evento durante la transacción para que dos inscripciones
+ * simultáneas no superen el tope.
+ */
+async function withInPersonSpot<T>(
+  event: Event,
+  fn: (tx: Prisma.TransactionClient) => Promise<T>,
+): Promise<T> {
+  if (event.inPersonCapacity == null) return fn(prisma);
+  return prisma.$transaction(async (tx) => {
+    await tx.$queryRaw`SELECT id FROM "events" WHERE id = ${event.id} FOR UPDATE`;
+    const taken = await tx.eventRegistration.count({
+      where: { eventId: event.id, attendanceMode: 'PRESENCIAL' },
+    });
+    if (taken >= event.inPersonCapacity!) {
+      throw new AppError(
+        409,
+        event.modality === 'HIBRIDO'
+          ? `${FULL_MESSAGE} Todavía podés inscribirte para verlo online.`
+          : FULL_MESSAGE,
+      );
+    }
+    return fn(tx);
+  });
+}
+
 /** Crea o actualiza la inscripción con un código de entrada único (reintenta ante colisión). */
 async function withFreshCode<T>(fn: (code: string) => Promise<T>): Promise<T> {
   for (let attempt = 0; attempt < 5; attempt++) {
@@ -112,10 +142,12 @@ export async function registerToEvent(eventId: string, data: CreateRegistrationI
     const updated =
       mode === 'PRESENCIAL'
         ? await withFreshCode((code) =>
-            prisma.eventRegistration.update({
-              where: { id: existing.id },
-              data: { attendanceMode: 'PRESENCIAL', checkInCode: existing.checkInCode ?? code },
-            }),
+            withInPersonSpot(event, (tx) =>
+              tx.eventRegistration.update({
+                where: { id: existing.id },
+                data: { attendanceMode: 'PRESENCIAL', checkInCode: existing.checkInCode ?? code },
+              }),
+            ),
           )
         : await prisma.eventRegistration.update({
             where: { id: existing.id },
@@ -128,15 +160,17 @@ export async function registerToEvent(eventId: string, data: CreateRegistrationI
   const registration =
     mode === 'PRESENCIAL'
       ? await withFreshCode((code) =>
-          prisma.eventRegistration.create({
-            data: {
-              userId: user.id,
-              eventId,
-              privacyAccepted: data.privacyAccepted,
-              attendanceMode: 'PRESENCIAL',
-              checkInCode: code,
-            },
-          }),
+          withInPersonSpot(event, (tx) =>
+            tx.eventRegistration.create({
+              data: {
+                userId: user.id,
+                eventId,
+                privacyAccepted: data.privacyAccepted,
+                attendanceMode: 'PRESENCIAL',
+                checkInCode: code,
+              },
+            }),
+          ),
         )
       : await prisma.eventRegistration.create({
           data: {

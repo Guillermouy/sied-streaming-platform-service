@@ -11,18 +11,34 @@ export async function createEvent(data: CreateEventInput) {
   });
 }
 
+/** Cantidad de inscriptos presenciales por evento (para mostrar cupo). */
+async function inPersonCounts(eventIds: string[]): Promise<Map<string, number>> {
+  if (eventIds.length === 0) return new Map();
+  const rows = await prisma.eventRegistration.groupBy({
+    by: ['eventId'],
+    where: { eventId: { in: eventIds }, attendanceMode: 'PRESENCIAL' },
+    _count: { _all: true },
+  });
+  return new Map(rows.map((r) => [r.eventId, r._count._all]));
+}
+
 export async function listEvents() {
-  return prisma.event.findMany({
+  const events = await prisma.event.findMany({
     orderBy: { date: 'desc' },
     include: { _count: { select: { registrations: true, viewerLogs: true } } },
   });
+  const counts = await inPersonCounts(events.map((e) => e.id));
+  return events.map((e) => ({ ...e, inPersonRegistered: counts.get(e.id) ?? 0 }));
 }
 
 export async function getEventById(id: string) {
-  return prisma.event.findUnique({
+  const event = await prisma.event.findUnique({
     where: { id },
     include: { _count: { select: { registrations: true, viewerLogs: true } } },
   });
+  if (!event) return null;
+  const counts = await inPersonCounts([id]);
+  return { ...event, inPersonRegistered: counts.get(id) ?? 0 };
 }
 
 export async function updateEvent(id: string, data: UpdateEventInput) {
