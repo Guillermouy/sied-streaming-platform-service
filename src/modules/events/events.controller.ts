@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { createEventSchema, updateEventSchema } from './events.schema';
 import * as eventsService from './events.service';
 import { AppError } from '../../middleware/error-handler';
+import { isAdminRequest } from '../../lib/auth';
 
 export async function create(req: Request, res: Response, next: NextFunction) {
   try {
@@ -26,7 +27,17 @@ export async function getById(req: Request, res: Response, next: NextFunction) {
   try {
     const event = await eventsService.getEventById(req.params.id);
     if (!event) throw new AppError(404, 'Evento no encontrado');
-    res.json(event);
+    if (isAdminRequest(req)) {
+      res.json(event);
+      return;
+    }
+    // Al público no le mostramos cuántos inscriptos hay ni el tamaño del cupo:
+    // solo si el cupo presencial está lleno.
+    const { inPersonCapacity, inPersonRegistered, _count, ...publicEvent } = event;
+    res.json({
+      ...publicEvent,
+      inPersonFull: inPersonCapacity != null && inPersonRegistered >= inPersonCapacity,
+    });
   } catch (err) {
     next(err);
   }

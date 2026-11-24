@@ -53,6 +53,13 @@ export function verifyToken(token: string): boolean {
   }
 }
 
+/** true si la request trae un token de admin válido (sin cortar la request si no). */
+export function isAdminRequest(req: Request): boolean {
+  const header = req.headers.authorization || '';
+  const token = header.startsWith('Bearer ') ? header.slice(7) : '';
+  return Boolean(token) && verifyToken(token);
+}
+
 export function requireAdmin(req: Request, res: Response, next: NextFunction) {
   const header = req.headers.authorization || '';
   const token = header.startsWith('Bearer ') ? header.slice(7) : '';
