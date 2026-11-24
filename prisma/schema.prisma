@@ -15,7 +15,7 @@ enum EventStatus {
 }
 
 model Event {
-  id                  String      @id @default(cuid())
+  id                  String        @id @default(cuid())
   title               String
   shortDescription    String
   longDescription     String?
@@ -24,20 +24,24 @@ model Event {
   endDate             DateTime?
   startTime           String
   endTime             String
-  timezone            String      @default("America/Argentina/Buenos_Aires")
+  timezone            String        @default("America/Argentina/Buenos_Aires")
   youtubeUrl          String?
   youtubeUrlEn        String?
-  status              EventStatus @default(DRAFT)
+  // Modalidad del evento: online (default), presencial o híbrido (ambas).
+  modality            EventModality @default(ONLINE)
+  venueName           String?
+  venueAddress        String?
+  status              EventStatus   @default(DRAFT)
   coverImage          String?
-  accessText          String?     @default("Acceder al evento")
-  registrationEnabled Boolean     @default(true)
-  liveEnabled         Boolean     @default(false)
-  createdAt           DateTime    @default(now())
-  updatedAt           DateTime    @updatedAt
+  accessText          String?       @default("Acceder al evento")
+  registrationEnabled Boolean       @default(true)
+  liveEnabled         Boolean       @default(false)
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
 
-  registrations  EventRegistration[]
-  chatMessages   ChatMessage[]
-  viewerLogs     LiveViewerLog[]
+  registrations EventRegistration[]
+  chatMessages  ChatMessage[]
+  viewerLogs    LiveViewerLog[]
 
   @@map("events")
 }
@@ -62,26 +66,31 @@ model User {
 }
 
 model EventRegistration {
-  id              String   @id @default(cuid())
+  id              String         @id @default(cuid())
   userId          String
   eventId         String
   privacyAccepted Boolean
-  createdAt       DateTime @default(now())
+  // Cómo asiste: online (default, incluye inscripciones previas) o presencial.
+  attendanceMode  AttendanceMode @default(ONLINE)
+  // Código de la entrada (va en el QR). Solo para inscripciones presenciales.
+  checkInCode     String?        @unique
+  createdAt       DateTime       @default(now())
 
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event    Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  checkIns CheckIn[]
 
   @@unique([userId, eventId])
   @@map("event_registrations")
 }
 
 model ChatMessage {
-  id          String   @id @default(cuid())
-  eventId     String
-  userId      String?
-  senderName  String
-  content     String
-  createdAt   DateTime @default(now())
+  id         String   @id @default(cuid())
+  eventId    String
+  userId     String?
+  senderName String
+  content    String
+  createdAt  DateTime @default(now())
 
   event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
   user  User? @relation(fields: [userId], references: [id], onDelete: SetNull)
@@ -91,14 +100,39 @@ model ChatMessage {
 }
 
 model LiveViewerLog {
-  id         String   @id @default(cuid())
-  eventId    String
-  userId     String?
-  sessionId  String
-  joinedAt   DateTime @default(now())
+  id        String   @id @default(cuid())
+  eventId   String
+  userId    String?
+  sessionId String
+  joinedAt  DateTime @default(now())
 
   event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
   @@index([eventId])
   @@map("live_viewer_logs")
+}
+
+enum EventModality {
+  ONLINE
+  PRESENCIAL
+  HIBRIDO
+}
+
+enum AttendanceMode {
+  ONLINE
+  PRESENCIAL
+}
+
+// Ingreso presencial validado por un admin. Una fila por inscripción y por día
+// (los eventos pueden durar varios días); el índice único evita doble conteo.
+model CheckIn {
+  id             String   @id @default(cuid())
+  registrationId String
+  day            String // YYYY-MM-DD en la zona horaria del evento
+  createdAt      DateTime @default(now())
+
+  registration EventRegistration @relation(fields: [registrationId], references: [id], onDelete: Cascade)
+
+  @@unique([registrationId, day])
+  @@map("check_ins")
 }

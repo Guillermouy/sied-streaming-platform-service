@@ -6,6 +6,7 @@ import { registrationsRouter } from './modules/registrations/registrations.route
 import { uploadRouter } from './modules/upload/upload.routes';
 import { chatRouter } from './modules/chat/chat.routes';
 import { authRouter } from './modules/auth/auth.routes';
+import { checkinRouter } from './modules/checkin/checkin.routes';
 import { errorHandler } from './middleware/error-handler';
 import { UPLOADS_DIR } from './lib/uploads';
 
@@ -25,5 +26,6 @@ app.use('/api/upload', uploadRouter);
 app.use('/api/events', eventsRouter);
 app.use('/api/events', registrationsRouter);
 app.use('/api/events', chatRouter);
+app.use('/api/events', checkinRouter);
 
 app.use(errorHandler);

@@ -25,6 +25,10 @@ const eventFields = z.object({
     .refine((val) => !val || isValidYouTubeUrl(val), {
       message: 'URL de YouTube (inglés) inválida',
     }),
+  // Modalidad: online (default), presencial o híbrido (online + presencial).
+  modality: z.enum(['ONLINE', 'PRESENCIAL', 'HIBRIDO']).optional(),
+  venueName: z.string().max(200).optional().nullable(),
+  venueAddress: z.string().max(300).optional().nullable(),
   status: z.enum(['DRAFT', 'PUBLISHED', 'LIVE', 'FINISHED']).optional(),
   coverImage: z.string().optional(),
   accessText: z.string().optional(),
@@ -39,20 +43,34 @@ function endDateNotBeforeStart(data: { date?: string; endDate?: string | null })
   return data.endDate >= data.date;
 }
 
+// Si el evento tiene parte presencial, el lugar es obligatorio.
+function venueRequiredWhenInPerson(data: {
+  modality?: string;
+  venueName?: string | null;
+  venueAddress?: string | null;
+}): boolean {
+  if (!data.modality || data.modality === 'ONLINE') return true;
+  return Boolean(data.venueAddress?.trim());
+}
+
+const venueIssue = {
+  message: 'Indicá la dirección del evento presencial',
+  path: ['venueAddress'],
+};
+
 const endDateIssue = {
   message: 'La fecha de fin no puede ser anterior a la fecha de inicio',
   path: ['endDate'],
 };
 
-export const createEventSchema = eventFields.refine(
-  endDateNotBeforeStart,
-  endDateIssue
-);
+export const createEventSchema = eventFields
+  .refine(endDateNotBeforeStart, endDateIssue)
+  .refine(venueRequiredWhenInPerson, venueIssue);
 
-export const updateEventSchema = eventFields.partial().refine(
-  endDateNotBeforeStart,
-  endDateIssue
-);
+export const updateEventSchema = eventFields
+  .partial()
+  .refine(endDateNotBeforeStart, endDateIssue)
+  .refine(venueRequiredWhenInPerson, venueIssue);
 
 export type CreateEventInput = z.infer<typeof createEventSchema>;
 export type UpdateEventInput = z.infer<typeof updateEventSchema>;

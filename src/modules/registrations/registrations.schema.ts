@@ -25,8 +25,10 @@ export const createRegistrationSchema = z
       .string()
       .min(1, 'El número de celular es obligatorio')
       .regex(/^\d+$/, 'Solo se permiten números'),
+    // Opcional para no romper clientes viejos: si falta se deduce del evento.
+    attendanceMode: z.enum(['ONLINE', 'PRESENCIAL']).optional(),
     privacyAccepted: z.literal(true, {
-      errorMap: () => ({ message: 'Debe aceptar la política de privacidad' }),
+      errorMap: () => ({ message: 'Tenés que aceptar la política de privacidad' }),
     }),
   })
   .refine(
