@@ -185,7 +185,7 @@ function qrBlock(code: string): string {
         <p style="margin:0;font-family:'SFMono-Regular',Consolas,'Courier New',monospace;font-size:24px;font-weight:700;letter-spacing:.14em;color:${C.navyDark};">${escapeHtml(formatCheckInCode(code))}</p>
         <p style="margin:10px 0 0;font-family:${FONT};font-size:14px;line-height:1.55;color:${C.muted};">
           Mostrá este QR en la acreditación (desde el celular o impreso).<br>
-          Si no se puede escanear, decí el código de arriba.
+          Si el QR no se puede escanear, presentá el código que figura arriba.
         </p>
       </td>
     </tr>
@@ -337,7 +337,7 @@ function buildInPerson(data: EventEmailData, kind: 'registration' | 'access'): B
   const hybridNote =
     event.modality === 'HIBRIDO'
       ? note(
-          `¿Al final no podés ir? También podés <a href="${escapeHtml(data.liveUrl)}" target="_blank" style="color:${C.blue};font-weight:600;text-decoration:underline;">seguirlo online</a> con tu enlace personal.`,
+          `Si no podés asistir de forma presencial, también podés <a href="${escapeHtml(data.liveUrl)}" target="_blank" style="color:${C.blue};font-weight:600;text-decoration:underline;">seguirlo online</a> con tu enlace personal.`,
         )
       : '';
 
@@ -365,7 +365,7 @@ function buildInPerson(data: EventEmailData, kind: 'registration' | 'access'): B
 Hola ${data.firstName}, ${isRegistration ? 'tu inscripción presencial fue confirmada.' : 'te reenviamos tu entrada presencial.'}
 
 Tu código de ingreso: ${formatCheckInCode(code)}
-Mostrá el QR adjunto (o decí este código) en la acreditación.
+Presentá el QR adjunto o este código en la acreditación.
 
 ${plainDetails(event, true)}
 
