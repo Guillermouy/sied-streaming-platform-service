@@ -34,4 +34,4 @@ El server corre en `http://localhost:3001`.
 
 - **Build Command:** `npm install && npx prisma generate && npx prisma migrate deploy && npm run build`
 - **Start Command:** `npm run start`
-- **Variables de entorno:** `DATABASE_URL`, `PORT`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `APP_URL`
+- **Variables de entorno:** `DATABASE_URL`, `PORT`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `APP_URL`, `DEEPL_API_KEY` (opcional: traducción automática del chat)

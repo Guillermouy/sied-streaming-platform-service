@@ -92,6 +92,11 @@ model ChatMessage {
   userId     String?
   senderName String
   content    String
+  // Traducción automática (DeepL). sourceLang: idioma detectado ("es", "en", "pt", ...).
+  // contentEs / contentEn: traducción a ese idioma; null si el original ya está en él o no se tradujo.
+  sourceLang String?
+  contentEs  String?
+  contentEn  String?
   createdAt  DateTime @default(now())
 
   event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)

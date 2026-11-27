@@ -1,4 +1,9 @@
 import { prisma } from '../../lib/prisma';
+import type { ChatTranslation } from '../../lib/translate';
+
+// Cache corto de "¿el evento tiene transmisión en inglés?" para no consultar la base en cada mensaje.
+const ENGLISH_CACHE_MS = 60_000;
+const englishCache = new Map<string, { value: boolean; expires: number }>();
 
 export const chatService = {
   async getRecentMessages(eventId: string, limit = 50) {
@@ -12,6 +17,9 @@ export const chatService = {
         userId: true,
         senderName: true,
         content: true,
+        sourceLang: true,
+        contentEs: true,
+        contentEn: true,
         createdAt: true,
       },
     }).then(msgs => msgs.reverse());
@@ -36,9 +44,33 @@ export const chatService = {
         userId: true,
         senderName: true,
         content: true,
+        sourceLang: true,
+        contentEs: true,
+        contentEn: true,
         createdAt: true,
       },
     });
+  },
+
+  async saveTranslation(id: string, t: ChatTranslation) {
+    return prisma.chatMessage.update({
+      where: { id },
+      data: { sourceLang: t.sourceLang, contentEs: t.contentEs, contentEn: t.contentEn },
+      select: { id: true, sourceLang: true, contentEs: true, contentEn: true },
+    });
+  },
+
+  /** Solo se traducen los mensajes de eventos con transmisión en inglés (los únicos con selector de idioma). */
+  async eventHasEnglish(eventId: string): Promise<boolean> {
+    const cached = englishCache.get(eventId);
+    if (cached && cached.expires > Date.now()) return cached.value;
+    const event = await prisma.event.findUnique({
+      where: { id: eventId },
+      select: { youtubeUrlEn: true },
+    });
+    const value = Boolean(event?.youtubeUrlEn?.trim());
+    englishCache.set(eventId, { value, expires: Date.now() + ENGLISH_CACHE_MS });
+    return value;
   },
 
   async logViewer(data: {
